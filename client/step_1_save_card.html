@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="checkout.css" />
+    <title>Step 1: Save Card Details</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+    <div id="main">
+        <div id="checkout">
+            <form id="payment-form">
+                <h1>Step 1: Save card details</h1>
+                <fieldset>
+                    <label>Email</label>
+                    <input id="cardholder-email" type="text" class="field" value="jenny@example.com">
+                </fieldset>
+                <fieldset>
+                    <label>Name</label>
+                    <input id="cardholder-name" type="text" class="field" value="Jenny Rosen">
+                </fieldset>
+                <fieldset>
+                    <label>
+                        <div id="card-element"></div>
+                    </label>
+                </fieldset>
+                <button id="card-button">
+                    Save Card
+                </button>
+                <div id="payment-message" class="hidden"></div>
+                <div id="card-message"></div>
+                <div id="card-result"></div>
+        </div>
+    </div>
+    </div>
+</body>
+
+<script>
+    let setupIntent;
+    const debug = (message) => {
+        var debugMessage = document.querySelector('#card-message');
+        console.log('DEBUG: ', message);
+        debugMessage.innerText += "\n" + message;
+    };
+    (async function () {
+        await fetch('/setup_intents').then(function (r) {
+            return r.json();
+        }).then(function (response) {
+            console.log(JSON.stringify(response, null, 2));
+            setupIntent = response;
+            debug('Fetched');
+        })
+    })();
+
+    // stripe theme
+    const appearance = {
+       theme: 'stripe'
+    };
+
+    // init collect card details
+    const stripe = Stripe(''); // set publisher key
+    const elements = stripe.elements({
+        appearance: {
+            theme: 'stripe'
+        }
+    });
+    const cardholderName = document.getElementById('cardholder-name');
+    const cardholderEmail = document.getElementById('cardholder-email');
+
+    const cardElement = elements.create('card', {
+        hidePostalCode: true,
+    });
+    cardElement.mount('#card-element');
+
+    function createCustomer(paymentMethod) {
+        debug('Creating customer ...');
+
+        fetch('/create_customer', {
+            method: 'POST',
+            body: JSON.stringify({
+                payment_method: paymentMethod,
+                name: cardholderName.value,
+                email: cardholderEmail.value
+            })
+        }).then(function (r) {
+            return r.json();
+        }).then(function (response) {
+            console.log(response);
+            if (response.error) {
+                debug(response.error.message);
+            } else {
+                debug('Created customer: ' + response.id);
+            }
+        })
+    }
+    // handle payment
+
+    const cardButton = document.getElementById('card-button');
+    // using handleCard setup to tokenize cardElement in tandem with secret to invoke 3DS modal if applicable
+    cardButton.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        stripe.confirmCardSetup(
+            // rely on setup intent to get to get the secret instead
+            setupIntent.client_secret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: {
+                    name: cardholderName.value,
+                    email: cardholderEmail.value
+                },
+            }
+        }).then(function (result) {
+            console.log(result);
+            if (result.error) {
+                debug(result.error.message)
+            } else {
+                debug('Setup succeeded');
+                debug('Setup intent payment method: ' + result.setupIntent.payment_method);
+                createCustomer(result.setupIntent.payment_method);
+            }
+        });
+    });
+</script>
+
+</html>

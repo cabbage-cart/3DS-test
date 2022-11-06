@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2: Charge Later</title>
+</head>
+
+<body>
+    <div id="admin">
+        <div id="tools">
+            <div id="tool">
+                <h1>Step 2: Charge Later</h1>
+                <fieldset>
+                    <label>
+                        <span>customer</span>
+                        <input type="text" name="" id="customer-input">
+                    </label>
+                    <label>
+                        <span>payment method</span>
+                        <input type="text" name="" id="payment-method">
+                    </label>
+                </fieldset>
+                <button id="card-button">
+                    Charge Customer
+                </button>
+                <div id="card-message"></div>
+            </div>
+            <hr>
+            <div id="customer-ref">
+                <input id="customer-id" type="text">
+                <button id="get-customer-button">
+                    Get Customer Details
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const customerInput = document.getElementById('customer-input');
+    const paymentMethodInput = document.getElementById('payment-method');
+    const cardButton = document.getElementById('card-button');
+    const retrieveCustomerButton = document.getElementById('get-customer-button');
+
+    const debug = (message) => {
+        var debugMessage = document.querySelector('#card-message');
+        console.log('DEBUG: ', message);
+        debugMessage.innerText += "\n" + message;
+    };
+
+    retrieveCustomerButton.addEventListener('click', async function (event) {
+        event.preventDefault();
+        const customerId = document.getElementById('customer-id');
+        await fetch('/get-customer-payment-methods?customer_id=' + customerId.value).then(function (r) {
+            return r.json();
+        }).then(function (response) {
+            console.log(response);
+        })
+    });
+
+    cardButton.addEventListener('click', async function (event) {
+        event.preventDefault();
+        await fetch('/payment_intents', {
+            method: 'POST',
+            body: JSON.stringify({
+                payment_method: paymentMethodInput.value,
+                customer: customerInput.value
+            })
+        }).then(function (r) {
+            return r.json();
+        }).then(function (response) {
+            console.log(response);
+            if (response.error) {
+                console.log(response.error);
+                debug(response.error.message)
+                // handle off session payment failures
+                debug('Email the customer with this link');
+                debug('');
+                debug('http:/localhost:4242/complete?pi=' + response.error.payment_intent.id + '&pm=' + paymentMethodInput.value);
+            } else {
+                debug('Customer charged!');
+            }
+        });
+    });
+</script>
+
+</html>

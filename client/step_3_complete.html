@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 3: Authenticate</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+    <h1>Step 3: Authenticate</h1>
+    <div id="card-error"></div>
+    <button id="card-button">Authenticate</button>
+    <div id="card-message"></div>
+</body>
+<script>
+    let paymentIntent;
+    let setupIntent;
+    const cardError = document.getElementById('card-error');
+    const cardButton = document.getElementById('card-button');
+    const stripe = Stripe(''); // set publisher key
+    const params = new URLSearchParams(window.location.search);
+    const paymenIntentId = params.get('pi');
+    const paymentMethodId = params.get('pm');
+    const debug = (message) => {
+        var debugMessage = document.querySelector('#card-message');
+        console.log('DEBUG: ', message);
+        debugMessage.innerText += "\n" + message;
+    };
+
+    debug('Fetching payment intent..');
+    // Fetch payment intent and show error
+    (async function () {
+        await fetch(`/payment_intents?id=${paymenIntentId}`).then(function (r) {
+            return r.json();
+        }).then(function (response) {
+            console.log(response);
+            paymentIntent = response;
+            if (response.last_payment_error) {
+                cardError.innerText = response.last_payment_error.message;
+            }
+        });
+    }());
+
+    cardButton.addEventListener('click', async function (event) {
+        event.preventDefault();
+        debug('Handling card payment... ');
+        await stripe.confirmCardPayment(paymentIntent.client_secret, {
+            payment_method: paymentMethodId,
+            setup_future_usage: "off_session"
+        }).then(function (response) {
+            console.log(response);
+            // one endpoint to evaluate the response object
+            // /confirm-payment {
+            // payment: response,
+            // customerId, // stripe customer
+            // email
+            //}
+
+            if (response.error) {
+                debug(response.error.message);
+            } else {
+                debug('Payment success')
+                // endpoint that takes customer id from BE to write to db -> success!
+            }
+        });
+    });
+</script>
+
+</html>
