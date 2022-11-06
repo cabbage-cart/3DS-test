@@ -12,7 +12,8 @@
 
 1. switch to server directory `cd server/php`
 2. run `composer start`
-3. visit http://localhost:4242 in brower
+3. visit http://localhost:4242 in browser to add card
+4. copy customer id and payment method id and visit http://localhost:4242/admin to test charging later
 
 
 #### Test cards
