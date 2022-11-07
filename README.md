@@ -7,7 +7,7 @@
 2. If you have a different version of PHP you can switch using `brew-php-switcher`. Install this by running `brew install brew-php-switcher`, then run `brew-php-switcher 7.4`
 3. To install composer run `brew install composer`
 4. switch to server directory `cd server/php`
-5. run `composer intall`
+5. run `composer install`
 6. add the appropriate publisher test keys to `step_1_save_card.html` and `step_3_complete.html` on `const stripe = Stripe('')` variable
 7. don't forget to create `.env` in the directory `server/php` file and add `STRIPE_SECRET_KEY=` variable
 
