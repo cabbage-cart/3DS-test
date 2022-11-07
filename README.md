@@ -9,7 +9,7 @@
 4. switch to server directory `cd server/php`
 5. run `composer intall`
 6. add the appropriate publisher test keys to `step_1_save_card.html` and `step_3_complete.html` on `const stripe = Stripe('')` variable
-7. don't forget to create `.env` file and add `STRIPE_SECRET_KEY=` variable
+7. don't forget to create `.env` in the directory `server/php` file and add `STRIPE_SECRET_KEY=` variable
 
 #### How to run
 
