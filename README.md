@@ -1,6 +1,7 @@
 #### Dependencies
 - PHP 7.4
 - PHP Composer
+- [Slim PHP Framework](https://www.slimframework.com/)
 
 #### How to setup
 1. If you don't have PHP 7.4 installed. You can install it using `brew install php@7.4`.
