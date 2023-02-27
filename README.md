@@ -9,8 +9,18 @@
 3. To install composer run `brew install composer`
 4. switch to server directory `cd server/php`
 5. run `composer install`
-6. add the appropriate publisher test keys to `step_1_save_card.html` and `step_3_complete.html` on `const stripe = Stripe('')` variable
-7. don't forget to create `.env` in the directory `server/php` file and add `STRIPE_SECRET_KEY=` variable
+6. add the appropriate publisher test keys to [line 65 of step_1_save_card.html](https://github.com/cabbage-cart/3DS-test/blob/c5405f23801e4881ea418151e3b7670583d9444f/client/step_1_save_card.html#L65)
+
+```js
+// init collect card details
+const stripe = Stripe('');
+```
+7. add appropriate publisher key to [line 25 of step_3_complete.html](https://github.com/cabbage-cart/3DS-test/blob/c5405f23801e4881ea418151e3b7670583d9444f/client/step_3_complete.html#L23)
+
+```js
+const stripe = Stripe(''); // set publisher key
+```
+8. don't forget to create `.env` in the directory `server/php` file and add `STRIPE_SECRET_KEY=` variable
 
 #### How to run
 
